@@ -18,7 +18,7 @@ public class ChunkSizeLandPlacer extends AbstractLandPlacer{
     }
 
 
-    @Override
+    /*@Override
     public void placeLand(){
         List<Point> centroids = manager.getWorld().getCentroids();
         centroids.sort(ChunkSizeLandPlacer::chunkSizeComparator);
@@ -29,6 +29,11 @@ public class ChunkSizeLandPlacer extends AbstractLandPlacer{
             currentLand += centroid.getSeedInfo().getChunkSize();
             if(currentLand > targetPixels) break;
         }
+    }*/
+
+    @Override
+    public boolean centroidIsLand(Point centroid){
+        return false;
     }
 
     private static int chunkSizeComparator(Point a, Point b){

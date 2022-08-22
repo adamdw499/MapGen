@@ -20,7 +20,12 @@ public abstract class AbstractLandPlacer{
     }
 
 
-    public abstract void placeLand();
+    public final void placeLand(){
+        manager.getWorld().getCentroids().stream().filter(this::centroidIsLand)
+                .forEach(p -> p.getSeedInfo().setBiome(Biome.LAND));
+    }
+
+    public abstract boolean centroidIsLand(Point centroid);
 
 
     public void classifyBiomes(){
@@ -32,25 +37,22 @@ public abstract class AbstractLandPlacer{
         //Separating oceans and lakes
         manager.getWorld().getCentroids().stream().filter(p -> !p.isLand())
                 .forEach(p -> p.getSeedInfo().setBiome(Biome.LAKE));
-        graph.traverse(frontier, (p) -> p.hasBiome(Biome.LAKE), p -> {
-            p.getSeedInfo().setBiome(Biome.OCEAN);
-        });
+        graph.traverse(frontier, (p) -> p.hasBiome(Biome.LAKE), p -> p.getSeedInfo().setBiome(Biome.OCEAN));
 
         //Classifying beaches
         classifyBeaches(graph, map);
 
         //Randomising moisture
         double[][] moisture = manager.getWorld().getMoistureTextureMap();
-        manager.getWorld().getCentroids().stream().filter(p -> p.isLand()).forEach(p -> {
+        manager.getWorld().getCentroids().stream().filter(Point::isLand).forEach(p -> {
             p.getSeedInfo().setMoisture(moisture[p.y][p.x]);
             if(!p.getSeedInfo().isBeach() && moisture[p.y][p.x] > 0.7) p.getSeedInfo().setBiome(Biome.LAKE);
         });
 
         //Redistributing moisture
         calculateMoisture(graph, 0.86);
-        manager.getWorld().getCentroids().stream().map(Point::getSeedInfo).filter(p -> p.getBiome().isLand()).forEach(p -> {
-            p.setBiome(Biome.classify(p.getElevation(), p.getMoisture()));
-        });
+        manager.getWorld().getCentroids().stream().map(Point::getSeedInfo).filter(p -> p.getBiome().isLand()).forEach(p ->
+                p.setBiome(Biome.classify(p.getElevation(), p.getMoisture())));
     }
 
     private void calculateMoisture(Graph graph, double moistureDecay){

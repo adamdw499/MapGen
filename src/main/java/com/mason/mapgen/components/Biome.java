@@ -11,9 +11,9 @@ import static com.mason.libgui.utils.Utils.sigmoid;
 public enum Biome{
 
 
-    OCEAN((world, p) -> waterTexture(world.getStoneTextureMap(), world.getHeightMap(),
-            Color.decode("#193200"), Color.decode("#3e7e00"),
-            new Color(31, 55, 119), new Color(54,54,97)).apply(p), false),
+    OCEAN((world, p) -> waterTexture(world,
+            new Color(165, 182, 218), new Color(67, 73, 96),
+            new Color(53, 95, 196), new Color(29, 38, 66)).apply(p), false),
     LAKE((world, p) -> texture(world.getMoistureTextureMap(), new Color(207, 235, 245), new Color(35, 109, 180)).apply(p), false),
     LAND((world, p) -> Color.GREEN, true),
     SCORCHED((world, p) -> texture(world.getStoneTextureMap(), bitmapNoise(153,153,153, 6),
@@ -67,11 +67,16 @@ public enum Biome{
         return p -> getDichromeColor(p.x, p.y, col1, col2, map);
     }
 
-    public static Function<Point, Color> waterTexture(double[][] landMap, double[][] heightMap,
+    public static Function<Point, Color> waterTexture(World world,
                                                       Color landCol1, Color landCol2,
                                                       Color waterCol1, Color waterCol2){
-        return p -> getQuadchromeColor(p.x, p.y, landMap, heightMap, sigmoid(heightMap[p.y][p.x]*2.2-0.5),
+        return p -> getQuadchromeColor(p.x, p.y, world.getStoneTextureMap(), world.getMoistureTextureMap(),
+                sigmoid(world.getHeightMap()[p.y][p.x]*3-0.5),
                 landCol1, landCol2, waterCol1, waterCol2);
+    }
+
+    private static double step(double x){
+        return (x < -0.2) ? 0 : (x < 0) ? 0.5 : 1;
     }
 
 
