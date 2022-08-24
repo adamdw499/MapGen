@@ -1,10 +1,7 @@
 package com.mason.mapgen.algorithms.landplacers;
 
-import com.mason.mapgen.components.Biome;
 import com.mason.mapgen.components.Point;
 import com.mason.mapgen.core.WorldManager;
-
-import java.util.List;
 
 public class ChunkSizeLandPlacer extends AbstractLandPlacer{
 
@@ -12,8 +9,8 @@ public class ChunkSizeLandPlacer extends AbstractLandPlacer{
     private final double landProportion;
 
 
-    public ChunkSizeLandPlacer(WorldManager manager, double landProportion){
-        super(manager);
+    public ChunkSizeLandPlacer(WorldManager manager, double landProportion, double lakeMoistureCutoff, double moistureDecay){
+        super(manager, lakeMoistureCutoff, moistureDecay);
         this.landProportion = landProportion;
     }
 

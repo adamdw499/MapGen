@@ -13,8 +13,8 @@ public class PerlinIslandPlacer extends AbstractLandPlacer{
     private final double[][] landMap;
 
 
-    public PerlinIslandPlacer(WorldManager manager, int octaves, double lacunarity, double persistence, double seaLevel, double landTapering){
-        super(manager);
+    public PerlinIslandPlacer(WorldManager manager, int octaves, double lacunarity, double persistence, double seaLevel, double landTapering, double lakeMoistureCutoff, double moistureDecay){
+        super(manager, lakeMoistureCutoff, moistureDecay);
         this.seaLevel = seaLevel;
         this.landTapering = landTapering;
 
@@ -26,8 +26,8 @@ public class PerlinIslandPlacer extends AbstractLandPlacer{
 
     }
 
-    public PerlinIslandPlacer(WorldManager manager){
-        this(manager, 1, 0.7, 0.65, 0.24, 2.9);
+    public PerlinIslandPlacer(WorldManager manager, double lakeMoistureCutoff, double moistureDecay){
+        this(manager, 1, 0.7, 0.65, 0.24, 2.9, lakeMoistureCutoff, moistureDecay);
     }
 
 

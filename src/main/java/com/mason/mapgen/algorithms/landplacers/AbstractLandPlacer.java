@@ -13,10 +13,14 @@ public abstract class AbstractLandPlacer{
 
 
     protected final WorldManager manager;
+    private final double moistureDecay;
+    private final double lakeMoistureCutoff;
 
 
-    public AbstractLandPlacer(WorldManager manager){
+    public AbstractLandPlacer(WorldManager manager, double lakeMoistureCutoff, double moistureDecay){
         this.manager = manager;
+        this.moistureDecay = moistureDecay;
+        this.lakeMoistureCutoff = lakeMoistureCutoff;
     }
 
 
@@ -46,16 +50,16 @@ public abstract class AbstractLandPlacer{
         double[][] moisture = manager.getWorld().getMoistureTextureMap();
         manager.getWorld().getCentroids().stream().filter(Point::isLand).forEach(p -> {
             p.getSeedInfo().setMoisture(moisture[p.y][p.x]);
-            if(!p.getSeedInfo().isBeach() && moisture[p.y][p.x] > 0.7) p.getSeedInfo().setBiome(Biome.LAKE);
+            if(!p.getSeedInfo().isBeach() && moisture[p.y][p.x] > lakeMoistureCutoff) p.getSeedInfo().setBiome(Biome.LAKE);
         });
 
         //Redistributing moisture
-        calculateMoisture(graph, 0.86);
+        calculateMoisture(graph);
         manager.getWorld().getCentroids().stream().map(Point::getSeedInfo).filter(p -> p.getBiome().isLand()).forEach(p ->
                 p.setBiome(Biome.classify(p.getElevation(), p.getMoisture())));
     }
 
-    private void calculateMoisture(Graph graph, double moistureDecay){
+    private void calculateMoisture(Graph graph){
         List<Graph.Vertex> frontier = graph.vertices().stream().filter(v -> v.point.hasBiome(Biome.LAKE)).collect(Collectors.toList());
         for(Graph.Vertex v : frontier){
             v.point.getSeedInfo().setMoisture(1);

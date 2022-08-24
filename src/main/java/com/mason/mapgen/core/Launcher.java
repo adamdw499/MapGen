@@ -27,7 +27,7 @@ public class Launcher{
         chunker.generatePolygons();
 
         //AbstractLandPlacer landPlacer = new PerlinIslandPlacer(manager);
-        AbstractLandPlacer landPlacer = new TectonicPlacer(manager, new PerlinIslandPlacer(manager), 150);
+        AbstractLandPlacer landPlacer = new TectonicPlacer(manager, new PerlinIslandPlacer(manager, -1, -1), 150, 0.76, 0.83);
         landPlacer.placeLand();
         manager.logSpeed("Placed land");
 
@@ -39,6 +39,7 @@ public class Launcher{
         //new HeightNoiseColorer(heights).color(manager.getWorld());
         landPlacer.classifyBiomes();
         manager.logSpeed("Classified lakes");
+        
 
         AbstractColorer colorer = new BiomeColorer(0, 0.99);
         colorer.color(manager.getWorld());

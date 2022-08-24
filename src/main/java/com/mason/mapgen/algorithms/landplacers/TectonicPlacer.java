@@ -18,8 +18,8 @@ public class TectonicPlacer extends AbstractLandPlacer{
     private final int numPlates;
 
 
-    public TectonicPlacer(WorldManager manager, AbstractLandPlacer subPlacer, int numPlates){
-        super(manager);
+    public TectonicPlacer(WorldManager manager, AbstractLandPlacer subPlacer, int numPlates, double lakeMoistureCutoff, double moistureDecay){
+        super(manager, lakeMoistureCutoff, moistureDecay);
         this.subPlacer = subPlacer;
         this.numPlates = numPlates;
 
