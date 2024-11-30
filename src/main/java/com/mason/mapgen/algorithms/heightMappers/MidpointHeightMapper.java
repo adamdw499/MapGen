@@ -1,6 +1,5 @@
 package com.mason.mapgen.algorithms.heightMappers;
 
-import com.mason.mapgen.algorithms.Direction;
 import com.mason.mapgen.components.Point;
 import com.mason.mapgen.components.World;
 
@@ -15,10 +14,12 @@ public class MidpointHeightMapper implements AbstractHeightMapper{
     public double[][] mapHeight(World world){
         Point[][] map = world.getMap();
         double[][] heights = new double[map.length][map[0].length];
+        double[][] prelimMap = world.getHeightMap();
         double[][] stoneMap = world.getStoneTextureMap();
         LinkedList<Point> frontier = getLandBorders(world, map);
         for(Point p : frontier) p.traverse();
         double increment = 0.015;
+        double cutoff = -100000;
         Point c;
 
         while(!frontier.isEmpty()){
@@ -30,19 +31,25 @@ public class MidpointHeightMapper implements AbstractHeightMapper{
                     }else{
                         heights[c.y+d.y][c.x+d.x] = heights[c.y][c.x] - increment;
                     }
-                    map[c.y+d.y][c.x+d.x].traverse();
-                    frontier.add(map[c.y+d.y][c.x+d.x]);
+                    if(heights[c.y+d.y][c.x+d.x]>cutoff){
+                        map[c.y+d.y][c.x+d.x].traverse();
+                        frontier.add(map[c.y+d.y][c.x+d.x]);
+                    }
                 }
             }
         }
 
         for(int y=0; y<heights.length; y++){
             for(int x=0; x<heights[y].length; x++){
-                heights[y][x] = 0.7*heights[y][x] + 0.3*stoneMap[y][x];
+                if(map[y][x].isTraversed()){
+                    heights[y][x] = 0.33*heights[y][x] + 0.33*stoneMap[y][x] + 0.33*prelimMap[y][x];
+                }else{
+                    heights[y][x] = -1;
+                }
             }
         }
 
-        for(Point s : world.getCentroids()) s.getSeedInfo().setElevation(heights[s.y][s.x]);
+        for(Point s : world.getCentroids()) s.centroidInfo().setElevation(heights[s.y][s.x]);
 
         world.resetTraversals();
 

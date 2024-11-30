@@ -1,8 +1,6 @@
 package com.mason.mapgen.algorithms.landplacers;
 
-import com.mason.mapgen.components.Biome;
-import com.mason.mapgen.components.Graph;
-import com.mason.mapgen.components.Point;
+import com.mason.mapgen.components.*;
 import com.mason.mapgen.core.WorldManager;
 
 import java.util.LinkedList;
@@ -12,24 +10,25 @@ import java.util.stream.Collectors;
 public abstract class AbstractLandPlacer{
 
 
-    protected final WorldManager manager;
+    protected final WorldMap map;
     private final double moistureDecay;
     private final double lakeMoistureCutoff;
 
 
-    public AbstractLandPlacer(WorldManager manager, double lakeMoistureCutoff, double moistureDecay){
-        this.manager = manager;
+    public AbstractLandPlacer(WorldMap map, double lakeMoistureCutoff, double moistureDecay){
+        this.map = map;
         this.moistureDecay = moistureDecay;
         this.lakeMoistureCutoff = lakeMoistureCutoff;
     }
 
 
     public final void placeLand(){
-        manager.getWorld().getCentroids().stream().filter(this::centroidIsLand)
+        map.getCentroids().stream().filter(this::centroidIsLand)
                 .forEach(p -> p.getSeedInfo().setBiome(Biome.LAND));
+        map.setHeightMap(getPreliminaryHeightMap());
     }
 
-    public abstract boolean centroidIsLand(Point centroid);
+    protected abstract boolean centroidIsLand(Point centroid);
 
 
     public void classifyBiomes(){
@@ -41,7 +40,7 @@ public abstract class AbstractLandPlacer{
         //Separating oceans and lakes
         manager.getWorld().getCentroids().stream().filter(p -> !p.isLand())
                 .forEach(p -> p.getSeedInfo().setBiome(Biome.LAKE));
-        graph.traverse(frontier, (p) -> p.hasBiome(Biome.LAKE), p -> p.getSeedInfo().setBiome(Biome.OCEAN));
+        graph.traverse(frontier, (p) -> p.hasBiome(Biome.LAKE), p -> p.centroidInfo().setBiome(Biome.OCEAN));
 
         //Classifying beaches
         classifyBeaches(graph, map);
@@ -55,23 +54,23 @@ public abstract class AbstractLandPlacer{
 
         //Redistributing moisture
         calculateMoisture(graph);
-        manager.getWorld().getCentroids().stream().map(Point::getSeedInfo).filter(p -> p.getBiome().isLand()).forEach(p ->
+        manager.getWorld().getCentroids().stream().map(Point::centroidInfo).filter(p -> p.getBiome().isLand()).forEach(p ->
                 p.setBiome(Biome.classify(p.getElevation(), p.getMoisture())));
     }
 
     private void calculateMoisture(Graph graph){
         List<Graph.Vertex> frontier = graph.vertices().stream().filter(v -> v.point.hasBiome(Biome.LAKE)).collect(Collectors.toList());
         for(Graph.Vertex v : frontier){
-            v.point.getSeedInfo().setMoisture(1);
+            v.point.centroidInfo().setMoisture(1);
         }
         Graph.Vertex current;
         while(!frontier.isEmpty()){
             current = frontier.remove(0);
             for(Graph.Edge edge : current.edges()) if(edge.b().point.isLand()
-                    && (edge.b().point.getSeedInfo().getMoisture()
-                    < current.point.getSeedInfo().getMoisture()*moistureDecay)){
+                    && (edge.b().point.centroidInfo().getMoisture()
+                    < current.point.centroidInfo().getMoisture()*moistureDecay)){
                 frontier.add(edge.b());
-                edge.b().point.getSeedInfo().setMoisture(current.point.getSeedInfo().getMoisture()*moistureDecay);
+                edge.b().point.centroidInfo().setMoisture(current.point.centroidInfo().getMoisture()*moistureDecay);
             }
         }
         graph.reset();
@@ -88,7 +87,7 @@ public abstract class AbstractLandPlacer{
             for(Graph.Edge edge : current.edges()) if(!edge.b().isTraversed()){
                 edge.b().traverse();
                 if(edge.b().point.isLand()){
-                    edge.b().point.getSeedInfo().setBeach(true);
+                    edge.b().point.centroidInfo().setBeach(true);
                 }else{
                     frontier.add(edge.b());
                 }
@@ -99,11 +98,13 @@ public abstract class AbstractLandPlacer{
 
     private LinkedList<Graph.Vertex> getOceanCorners(Graph graph, Point[][] map){
         LinkedList<Graph.Vertex> frontier = new LinkedList<>();
-        frontier.add(graph.toVertex(map[0][0].getSeed()));
-        frontier.add(graph.toVertex(map[0][map[0].length-1].getSeed()));
-        frontier.add(graph.toVertex(map[map.length-1][map[0].length-1].getSeed()));
-        frontier.add(graph.toVertex(map[map.length-1][0].getSeed()));
+        frontier.add(graph.toVertex(map[0][0].getCentroid()));
+        frontier.add(graph.toVertex(map[0][map[0].length-1].getCentroid()));
+        frontier.add(graph.toVertex(map[map.length-1][map[0].length-1].getCentroid()));
+        frontier.add(graph.toVertex(map[map.length-1][0].getCentroid()));
         return frontier;
     }
+
+    protected abstract double[][] getPreliminaryHeightMap();
 
 }

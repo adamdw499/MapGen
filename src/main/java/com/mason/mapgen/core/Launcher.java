@@ -23,11 +23,11 @@ public class Launcher{
         WorldManager manager = new WorldManager(800, 600, 600, 600);
         manager.start();
 
-        AbstractChunker chunker = new RandomChunker(14350, 1, manager);
-        chunker.generatePolygons();
+        AbstractChunker chunker = new RandomChunker(14350, 1, manager.getWorld().getMap());
+        chunker.generatePolygons(manager.getSpeedLogger());
 
-        //AbstractLandPlacer landPlacer = new PerlinIslandPlacer(manager);
-        AbstractLandPlacer landPlacer = new TectonicPlacer(manager, new PerlinIslandPlacer(manager, -1, -1), 150, 0.76, 0.83);
+        AbstractLandPlacer landPlacer = new TectonicPlacer(manager.getWorld().getMap(),
+                new PerlinIslandPlacer(manager.getWorld().getMap(), -1, -1), 150, 0.96, 0.83);
         landPlacer.placeLand();
         manager.logSpeed("Placed land");
 
@@ -35,10 +35,12 @@ public class Launcher{
         double[][] heights = heightMapper.mapHeight(manager.getWorld());
         manager.getWorld().setHeightMap(heights);
         manager.logSpeed("Mapped elevation");
+
         //new Weatherer(manager.getWorld(), heights, 7000).weather();
-        //new HeightNoiseColorer(heights).color(manager.getWorld());
+
+        //new HeightNoiseColorer(manager.getWorld().getHeightMap()).color(manager.getWorld());
         landPlacer.classifyBiomes();
-        manager.logSpeed("Classified lakes");
+        manager.logSpeed("Classified biomes");
         
 
         AbstractColorer colorer = new BiomeColorer(0, 0.99);
@@ -49,7 +51,7 @@ public class Launcher{
         riverPlacer.placeRivers(manager.getWorld(), heights);
         manager.logSpeed("Generated rivers");
 
-        manager.recalcWorldImage();
+        //manager.recalcWorldImage();
         manager.showWorld();
 
     }

@@ -1,6 +1,5 @@
 package com.mason.mapgen.algorithms.heightMappers;
 
-import com.mason.mapgen.algorithms.Direction;
 import com.mason.mapgen.components.World;
 
 import static com.mason.libgui.utils.Utils.R;

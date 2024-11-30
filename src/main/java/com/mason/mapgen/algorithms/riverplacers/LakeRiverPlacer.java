@@ -1,6 +1,5 @@
 package com.mason.mapgen.algorithms.riverplacers;
 
-import com.mason.mapgen.algorithms.Direction;
 import com.mason.mapgen.components.Biome;
 import com.mason.mapgen.components.Point;
 import com.mason.mapgen.components.World;

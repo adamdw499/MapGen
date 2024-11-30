@@ -20,7 +20,7 @@ public class VoronoiColorer implements AbstractColorer{
         }
         for(Point[] points : world.getMap()){
             for(Point point : points){
-                point.setColor(point.getSeed().getColor());
+                point.setColor(point.getCentroid().getColor());
             }
         }
         for(Point centroid : centroids){

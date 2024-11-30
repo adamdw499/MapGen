@@ -1,7 +1,7 @@
 package com.mason.mapgen.core;
 
 import com.mason.libgui.components.misc.LoadingMessage;
-import com.mason.libgui.components.panes.ScrollablePane;
+import com.mason.libgui.components.panes.PannablePane;
 import com.mason.libgui.core.GUIManager;
 import com.mason.libgui.utils.SpeedLogger;
 import com.mason.libgui.utils.StyleInfo;
@@ -15,7 +15,7 @@ import java.awt.*;
 public class WorldManager extends GUIManager{
 
 
-    private final ScrollablePane viewPane;
+    private final PannablePane viewPane;
     private final World world;
     private final LoadingMessage loadingMessage;
     private final SpeedLogger speedLogger;
@@ -23,23 +23,21 @@ public class WorldManager extends GUIManager{
 
     public WorldManager(int width, int height, int worldWidth, int worldHeight){
         super(width, height, "Map Generator");
-        viewPane = new ScrollablePane(StyleInfo.DEFAULT_STYLE_INFO, 0, 0, worldWidth, worldHeight,
-                width, height, false);
+        viewPane = new PannablePane(StyleInfo.DEFAULT_STYLE_INFO, 0, 0, worldWidth, worldHeight,
+                width, height, true);
         loadingMessage = new LoadingMessage(Color.WHITE, 0, 0, 80);
         speedLogger = new SpeedLogger(loadingMessage);
+        addComponent(viewPane);
+        addComponent(loadingMessage, UIAligner.Position.MIDDLE, UIAligner.Position.MIDDLE);
+
         speedLogger.start();
-        super.addComponent(viewPane);
-        super.addComponent(loadingMessage, UIAligner.Position.MIDDLE, UIAligner.Position.MIDDLE);
         world = new World(worldWidth, worldHeight);
+        speedLogger.log("Initialised world.");
     }
 
 
     public World getWorld(){
         return world;
-    }
-
-    public Point[][] getMap(){
-        return world.getMap();
     }
 
     public Graph getGraph(){
@@ -52,11 +50,15 @@ public class WorldManager extends GUIManager{
 
     public void showWorld(){
         removeComponent(loadingMessage);
-        viewPane.addComponent(world);
+        viewPane.addToBackground(world);
     }
 
     public void logSpeed(String message){
         speedLogger.log(message);
+    }
+
+    public SpeedLogger getSpeedLogger(){
+        return speedLogger;
     }
 
 }

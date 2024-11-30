@@ -1,6 +1,9 @@
 package com.mason.mapgen.components;
 
+import com.mason.libgui.utils.Utils;
+
 import java.awt.*;
+import java.util.Objects;
 
 import static com.mason.libgui.utils.Utils.R;
 import static java.lang.Math.abs;
@@ -10,12 +13,12 @@ public class Point{
 
     public final int x, y;
     private Color color;
-    private boolean centroid = false;
-    private Point seed;
+    private Point centroid;
     private CentroidInfo centroidInfo;
     private int distFromCentroid = -1;
     private boolean traversed = false;
     private boolean river = false;
+    private double elevation = -1;
 
 
     public Point(int x, int y){
@@ -33,18 +36,18 @@ public class Point{
         return color;
     }
 
-    public void setCentroid(boolean centroid){
-        this.centroid = centroid;
-        if(centroid){
-            setSeed(this);
-            centroidInfo = new CentroidInfo();
-        }else{
-            centroidInfo = null;
-        }
+
+    public void grantCentroidStatus(){
+        setCentroid(this);
+        centroidInfo = new CentroidInfo();
+    }
+
+    public void revokeCentroidStatus(){
+        centroidInfo = null;
     }
 
     public boolean isCentroid(){
-        return centroid;
+        return centroidInfo != null;
     }
 
 
@@ -74,24 +77,20 @@ public class Point{
     }
 
 
-    public void setSeed(Point seed){
-        this.seed = seed;
+    public void setCentroid(Point centroid){
+        this.centroid = centroid;
     }
 
-    public Point getSeed(){
-        return seed;
+    public boolean hasCentroid(){
+        return centroid != null;
     }
 
-    public int getSeedIndex(){
-        return centroidInfo.getIndex();
+    public Point getCentroid(){
+        return centroid;
     }
 
-    public void setSeedIndex(int index){
-        centroidInfo.setIndex(index);
-    }
-
-    public boolean hasSameCentroid(Point p){
-        return seed.equals(p.seed);
+    public boolean sharesCentroid(Point p){
+        return centroid.equals(p.centroid);
     }
 
     public void setDistFromCentroid(int distFromCentroid){
@@ -102,12 +101,20 @@ public class Point{
         return distFromCentroid;
     }
 
-    public CentroidInfo getSeedInfo(){
-        return centroid ? centroidInfo : seed.centroidInfo;
+    public void setElevation(double e){
+        elevation = e;
+    }
+
+    public double getElevation(){
+        return elevation;
+    }
+
+    public CentroidInfo centroidInfo(){
+        return isCentroid() ? centroidInfo : centroid.centroidInfo;
     }
 
     public boolean hasSameBiome(Point p){
-        return p.hasBiome(seed.getSeedInfo().getBiome());
+        return p.hasBiome(centroid.centroidInfo().getBiome());
     }
 
     public boolean isTraversed(){
@@ -123,20 +130,36 @@ public class Point{
     }
 
     public boolean hasBiome(Biome biome){
-        return getSeedInfo().getBiome().equals(biome);
+        return centroidInfo().getBiome().equals(biome);
     }
     
     public boolean isLand(){
-        return getSeedInfo().getBiome().isLand();
+        return centroidInfo().getBiome().isLand();
     }
 
     public boolean isRiver(){
         return river;
     }
 
+    @Utils.Unfinished("Review")
     public void setRiver(boolean river, World world){
         this.river = river;
         if(river) setColor(Biome.RIVER.getColor(world, this));
+    }
+
+
+    @Override
+    public boolean equals(Object o){
+        if(this == o) return true;
+        if(o == null || getClass() != o.getClass()) return false;
+
+        Point point = (Point) o;
+        return x == point.x && y == point.y;
+    }
+
+    @Override
+    public int hashCode(){
+        return Objects.hash(x, y);
     }
 
 }

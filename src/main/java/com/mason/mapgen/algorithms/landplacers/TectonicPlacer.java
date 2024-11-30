@@ -3,6 +3,7 @@ package com.mason.mapgen.algorithms.landplacers;
 import com.mason.mapgen.components.Graph.Edge;
 import com.mason.mapgen.components.Graph.Vertex;
 import com.mason.mapgen.components.Point;
+import com.mason.mapgen.components.WorldMap;
 import com.mason.mapgen.core.WorldManager;
 
 import java.util.HashMap;
@@ -18,8 +19,8 @@ public class TectonicPlacer extends AbstractLandPlacer{
     private final int numPlates;
 
 
-    public TectonicPlacer(WorldManager manager, AbstractLandPlacer subPlacer, int numPlates, double lakeMoistureCutoff, double moistureDecay){
-        super(manager, lakeMoistureCutoff, moistureDecay);
+    public TectonicPlacer(WorldMap map, AbstractLandPlacer subPlacer, int numPlates, double lakeMoistureCutoff, double moistureDecay){
+        super(map, lakeMoistureCutoff, moistureDecay);
         this.subPlacer = subPlacer;
         this.numPlates = numPlates;
 
@@ -28,7 +29,12 @@ public class TectonicPlacer extends AbstractLandPlacer{
 
     @Override
     public boolean centroidIsLand(Point centroid){
-        return subPlacer.centroidIsLand(plateMap.get(manager.getGraph().toVertex(centroid)).point);
+        return subPlacer.centroidIsLand(plateMap.get(map.getChunkGraph().toVertex(centroid)).point);
+    }
+
+    @Override
+    public double[][] getPreliminaryHeightMap(){
+        return subPlacer.getPreliminaryHeightMap();
     }
 
 

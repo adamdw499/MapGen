@@ -91,7 +91,7 @@ public class Graph extends UIComponent{
     }
 
     public void traverseLand(Vertex start, Consumer<Point> action){
-        traverse(start, p -> p.isLand(), action);
+        traverse(start, Point::isLand, action);
     }
 
     public void reset(){
@@ -138,6 +138,11 @@ public class Graph extends UIComponent{
                         edge.b.point.x, edge.b.point.y);
             }
         }
+    }
+
+    @Override
+    public void tick(int mx, int my){
+        //empty
     }
 
 }

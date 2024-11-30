@@ -27,7 +27,7 @@ public class BiomeColorer implements AbstractColorer{
     public void color(World world){
         for(Point[] points : world.getMap()){
             for(Point point : points){
-                point.setColor(point.getSeedInfo().getBiome().getColor(world, point));
+                point.setColor(point.centroidInfo().getBiome().getColor(world, point));
             }
         }
         //graphicBlur(world);
@@ -42,7 +42,7 @@ public class BiomeColorer implements AbstractColorer{
             for(Point point : points) if(point.isLand()){
                 adjacentSeed = getAdjacentSeed(graph, point);
                 if(adjacentSeed.isLand() && !adjacentSeed.hasSameBiome(point)){
-                    point.setColor(getColorAverage(point.getColor(), adjacentSeed.getSeedInfo().getBiome().getColor(world, point),
+                    point.setColor(getColorAverage(point.getColor(), adjacentSeed.centroidInfo().getBiome().getColor(world, point),
                             getWeight(point, adjacentSeed)));
                 }
             }
@@ -52,7 +52,7 @@ public class BiomeColorer implements AbstractColorer{
     private Point getAdjacentSeed(Graph graph, Point point){
         /*Point adjCentroid = graph.toVertex(point.getSeed()).edges().stream().map(e -> e.b().point)
                 .min((p1, p2) -> compareBiomeDist(point, p1, p2)).orElseThrow();*/
-        return new Distribution<>(graph.toVertex(point.getSeed()).edges(),
+        return new Distribution<>(graph.toVertex(point.getCentroid()).edges(),
                 edge -> exp(-edge.b().point.squareDist(point)/100D)+0.0005).get().b().point;
     }
 
@@ -63,7 +63,7 @@ public class BiomeColorer implements AbstractColorer{
     }
 
     private double getWeight(Point p, Point adj){
-        return 1.2D*min( ((double)p.squareDist(p.getSeed()))/((double)p.squareDist(adj)), 1) - 1D;
+        return 1.2D*min( ((double)p.squareDist(p.getCentroid()))/((double)p.squareDist(adj)), 1) - 1D;
     }
 
 
